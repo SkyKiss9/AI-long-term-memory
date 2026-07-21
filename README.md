@@ -1,10 +1,60 @@
 # AI长期记忆 / AI Long-Term Memory
 
+> 脱敏双语版 Codex 长期项目连续性技能  
+> A redacted bilingual Codex continuity skill for long-running projects
+
 ## 中文说明
 
 这是一个给 Codex 长期项目使用的连续性技能。它解决的不是“怎么写一段交接摘要”，而是“当新对话没有旧上下文时，怎样准确恢复项目目标、演变、用户决定、决定理由、边界、当前状态和下一步”。
 
 这个公开版本已经脱敏，只保留通用方法和通用工具，不包含任何真实项目记录、业务数据、历史对话、账号信息、日志、凭证或私有仓库内容。
+
+### 它解决什么问题
+
+- 新对话只拿到压缩摘要，项目真实目标、边界和当前状态丢失。
+- 助手把自己的建议误当成用户已经确认的决定。
+- 接手时不知道哪些路线已经被替代、哪些风险已经被接受、下一步到底该做什么。
+
+### 它怎么工作
+
+1. 先找全项目已有来源，而不是凭摘要猜历史。
+2. 按时间线重建项目演变，重要决定保留理由、边界和后续状态。
+3. 新对话先恢复真实上下文，再从当前授权位置继续。
+4. 用一次冷启动接手、自然写回、第二次冷启动接手来证明它真的可用。
+
+### 激活状态一览
+
+| 状态 | 代表什么 | 能不能直接当成“已经可用” |
+|---|---|---|
+| `registered` | 只接好了触发规则和清单 | 不能 |
+| `bootstrapped` | 已重建项目内记录，但还没通过第一次全新接手 | 不能 |
+| `handoff-pending` | 第一次全新接手和自然写回已完成，等待第二次接手 | 不能 |
+| `cold-start-validated` | 第二次全新接手也通过，普通接续可用 | 可以 |
+| `live-validated` | 在此基础上还完成了真实授权工作和复跑 | 可以 |
+
+### 生命周期
+
+```mermaid
+flowchart LR
+  A["registered"] --> B["bootstrapped"]
+  B --> C["handoff-pending"]
+  C --> D["cold-start-validated"]
+  D --> E["live-validated"]
+```
+
+### 30秒快速开始
+
+1. 把 `skills/maintain-project-continuity` 放进你的 Codex 技能目录。
+2. 在目标项目里登记 `.codex/project-continuity.json`。
+3. 把规则块写进目标项目的 `AGENTS.md`。
+4. 运行校验脚本确认项目记录结构完整。
+
+示例：
+
+```bash
+python skills/maintain-project-continuity/scripts/install_project.py <project-root> --project-name "My Project"
+python skills/maintain-project-continuity/scripts/validate_project.py <project-root>
+```
 
 ### 这个仓库包含什么
 
@@ -44,13 +94,6 @@
 - `skills/maintain-project-continuity/scripts/`：安装与校验脚本
 - `skills/maintain-project-continuity/tests/`：契约测试
 
-### 安装方式
-
-1. 把 `skills/maintain-project-continuity` 放到你的 Codex 技能目录。
-2. 在目标项目里登记 `.codex/project-continuity.json`。
-3. 把规则块写进目标项目的 `AGENTS.md`。
-4. 运行校验脚本，确认项目记录结构完整。
-
 ### 公开命名
 
 这个公开仓库使用展示名 **AI长期记忆 / AI Long-Term Memory**。  
@@ -63,6 +106,53 @@
 This is a continuity skill for long-running Codex projects. It does not try to solve “how to write a short handoff summary”. It solves “how a fresh conversation can accurately recover the project goal, evolution, user decisions, decision rationale, boundaries, current state, and next step without inheriting hidden context”.
 
 This public version is fully redacted. It keeps only the generic method and generic tooling. It does not include real project notebooks, business data, conversation archives, account information, logs, credentials, or private repository content.
+
+### What problem it solves
+
+- Fresh conversations inherit compressed summaries and lose the real goal, boundaries, and current state.
+- Assistant proposals get misread as user-approved decisions.
+- Handoffs lose track of superseded routes, accepted risks, and the true next action.
+
+### How it works
+
+1. Recover the full available source boundary before summarizing history.
+2. Rebuild the story in time order, preserving rationale, boundaries, and later status for material decisions.
+3. Make every fresh conversation restore the real context first, then continue only from the currently authorized position.
+4. Prove usability through a fresh cold-start recovery, natural write-back, and a second fresh handoff.
+
+### Activation states
+
+| State | Meaning | Ready for ordinary continuation |
+|---|---|---|
+| `registered` | Trigger and manifest are wired only | No |
+| `bootstrapped` | Project-local records exist, but the first fresh handoff has not passed | No |
+| `handoff-pending` | First fresh handoff and write-back passed, waiting for the second handoff | No |
+| `cold-start-validated` | Second fresh handoff passed; normal continuation is usable | Yes |
+| `live-validated` | Authorized real work and rerun evidence also passed | Yes |
+
+### Lifecycle
+
+```mermaid
+flowchart LR
+  A["registered"] --> B["bootstrapped"]
+  B --> C["handoff-pending"]
+  C --> D["cold-start-validated"]
+  D --> E["live-validated"]
+```
+
+### 30-second quick start
+
+1. Put `skills/maintain-project-continuity` in your Codex skills directory.
+2. Register `.codex/project-continuity.json` inside the target project.
+3. Insert the managed continuity block into the target project's `AGENTS.md`.
+4. Run the validation script and confirm the project record structure is complete.
+
+Example:
+
+```bash
+python skills/maintain-project-continuity/scripts/install_project.py <project-root> --project-name "My Project"
+python skills/maintain-project-continuity/scripts/validate_project.py <project-root>
+```
 
 ### What this repository includes
 
@@ -101,13 +191,6 @@ This public version is fully redacted. It keeps only the generic method and gene
 - `skills/maintain-project-continuity/references/`: method notes
 - `skills/maintain-project-continuity/scripts/`: install and validation scripts
 - `skills/maintain-project-continuity/tests/`: contract tests
-
-### Installation
-
-1. Copy `skills/maintain-project-continuity` into your Codex skills directory.
-2. Register `.codex/project-continuity.json` inside the target project.
-3. Insert the managed continuity block into the target project's `AGENTS.md`.
-4. Run the validation script and confirm the project record structure is complete.
 
 ### Public naming
 
