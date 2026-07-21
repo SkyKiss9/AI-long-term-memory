@@ -1,0 +1,4 @@
+interface:
+  display_name: "AI长期记忆 / AI Long-Term Memory"
+  short_description: "长期项目首次对话自动恢复，并在激活时完成来源重建、冷启动验证与写回 / Restore long-running project context on the first relevant turn and finish activation with source rebuild, cold-start validation, and write-back."
+  default_prompt: "自动使用 $maintain-project-continuity。若项目仍未完整激活，继续完成来源恢复、项目记录、冷启动验收和提交。 / Automatically use $maintain-project-continuity. If the project is not fully activated, continue source recovery, project-local records, cold-start acceptance, and commit the result."
