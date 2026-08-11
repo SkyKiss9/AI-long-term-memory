@@ -1,16 +1,8 @@
 # Project Timeline
 
-## Source coverage
-
-| Source | Read status | Role | Gaps |
-|---|---|---|---|
-
-## Entries
-
 ### YYYY-MM-DD - short reason
 
-- Source:
-- Why this started:
-- Work and result:
-- Decision and user's reason, or: no new user decision:
-- Remaining work and evidence boundary:
+- Direct source:
+- What changed and why:
+- Actual result and remaining limit:
+- User decision and reason, or: no new user decision:

@@ -17,30 +17,16 @@
 
 ### 它怎么工作
 
-1. 先找全项目已有来源，而不是凭摘要猜历史。
-2. 按时间线重建项目演变，重要决定保留理由、边界和后续状态。
-3. 新对话先恢复真实上下文，再从当前授权位置继续。
-4. 用一次冷启动接手、自然写回、第二次冷启动接手来证明它真的可用。
+1. 原始材料保留事实，时间线记录变化和理由，当前交接只作为书签。
+2. 普通新对话只读当前交接，然后直接处理用户的工作。
+3. 信息不足或冲突时，AI按引用局部回查；不默认加载完整历史。
+4. 有实质变化时由AI自动写回，用户不需要管理记忆系统。
 
-### 激活状态一览
+### 日常接续与专项审计
 
-| 状态 | 代表什么 | 能不能直接当成“已经可用” |
-|---|---|---|
-| `registered` | 只接好了触发规则和清单 | 不能 |
-| `bootstrapped` | 已重建项目内记录，但还没通过第一次全新接手 | 不能 |
-| `handoff-pending` | 第一次全新接手和自然写回已完成，等待第二次接手 | 不能 |
-| `cold-start-validated` | 第二次全新接手也通过，普通接续可用 | 可以 |
-| `live-validated` | 在此基础上还完成了真实授权工作和复跑 | 可以 |
-
-### 生命周期
-
-```mermaid
-flowchart LR
-  A["registered"] --> B["bootstrapped"]
-  B --> C["handoff-pending"]
-  C --> D["cold-start-validated"]
-  D --> E["live-validated"]
-```
+- 日常接续：只读当前交接，必要时局部回查。
+- 首次建档、完整历史审计和多轮失真复核：属于专项工作，才读取完整来源。
+- 清单里的状态只是历史说明，不能自动把普通对话变成考试。
 
 ### 30秒快速开始
 
@@ -48,6 +34,8 @@ flowchart LR
 2. 在目标项目里登记 `.codex/project-continuity.json`。
 3. 把规则块写进目标项目的 `AGENTS.md`。
 4. 运行校验脚本确认项目记录结构完整。
+
+校验结果使用 `output_schema_version: 1`，只表示结构检查；不包含记忆、业务或用户体验验收结论。
 
 示例：
 
@@ -75,15 +63,16 @@ python skills/maintain-project-continuity/scripts/validate_project.py <project-r
 
 ### 核心方法
 
-1. 先找全项目已有来源，而不是凭摘要猜历史。
-2. 按时间线记录项目如何变化，重要决定要保留理由和边界。
-3. 新对话先恢复真实上下文，再从当前授权位置继续。
+1. 原始材料证明事实。
+2. 时间线记录变化、理由和本轮直接来源。
+3. 当前交接只指向当前位置和下一项已授权工作。
 
 ### 技能里最关键的几个约束
 
-- 仅“注册”技能，不等于已经可用。
-- 真正激活，必须经过来源重建、项目内记录、一次全新冷启动接手、自然写回、第二次全新接手。
-- 首次项目相关消息就要恢复上下文，不要等用户反复提醒“继续”。
+- 普通开始只读当前交接，不默认读完整时间线和全部来源。
+- 用户照常工作和决策，AI负责查找、维护和写回。
+- 只有首次建档、明确审计或局部回查无法解决冲突时才读取完整历史。
+- 检查脚本只检查结构，不证明记忆、业务或用户体验已经通过。
 - 项目事实只能来自该项目自己登记的记录，不能偷偷拿全局记忆、旧任务或外部资料补历史。
 
 ### 目录结构
@@ -115,30 +104,16 @@ This public version is fully redacted. It keeps only the generic method and gene
 
 ### How it works
 
-1. Recover the full available source boundary before summarizing history.
-2. Rebuild the story in time order, preserving rationale, boundaries, and later status for material decisions.
-3. Make every fresh conversation restore the real context first, then continue only from the currently authorized position.
-4. Prove usability through a fresh cold-start recovery, natural write-back, and a second fresh handoff.
+1. Original sources preserve facts, the timeline records changes and reasons, and the handoff is only a bookmark.
+2. An ordinary fresh conversation reads the current handoff and starts the user's work.
+3. When something is missing or contradictory, the AI follows targeted references instead of loading all history.
+4. The AI writes back material changes automatically; the user does not administer the memory system.
 
-### Activation states
+### Daily continuation versus audits
 
-| State | Meaning | Ready for ordinary continuation |
-|---|---|---|
-| `registered` | Trigger and manifest are wired only | No |
-| `bootstrapped` | Project-local records exist, but the first fresh handoff has not passed | No |
-| `handoff-pending` | First fresh handoff and write-back passed, waiting for the second handoff | No |
-| `cold-start-validated` | Second fresh handoff passed; normal continuation is usable | Yes |
-| `live-validated` | Authorized real work and rerun evidence also passed | Yes |
-
-### Lifecycle
-
-```mermaid
-flowchart LR
-  A["registered"] --> B["bootstrapped"]
-  B --> C["handoff-pending"]
-  C --> D["cold-start-validated"]
-  D --> E["live-validated"]
-```
+- Daily continuation reads only the current handoff and expands through targeted lookup when needed.
+- First-time reconstruction, full-history audits, and multi-round drift studies are special verification work.
+- Manifest states are historical labels, not a router that turns ordinary conversations into exams.
 
 ### 30-second quick start
 
@@ -146,6 +121,8 @@ flowchart LR
 2. Register `.codex/project-continuity.json` inside the target project.
 3. Insert the managed continuity block into the target project's `AGENTS.md`.
 4. Run the validation script and confirm the project record structure is complete.
+
+Validator output uses `output_schema_version: 1` and reports structure only; it does not certify memory, business results, or user experience.
 
 Example:
 
@@ -173,15 +150,16 @@ python skills/maintain-project-continuity/scripts/validate_project.py <project-r
 
 ### Core method
 
-1. Recover the full available source boundary before summarizing history.
-2. Rebuild the story in time order, and preserve rationale and boundaries for material decisions.
-3. Make every fresh conversation restore the real context first, then continue only from the currently authorized position.
+1. Original sources prove facts.
+2. The timeline records changes, reasons, and direct sources.
+3. The handoff points only to the current position and next authorized work.
 
 ### The most important rules
 
-- Registering the skill does not mean it is activated.
-- Activation requires source reconstruction, project-local records, one fresh cold-start recovery, natural write-back, and a second fresh handoff.
-- The first project-related user message should trigger context recovery automatically.
+- Ordinary starts read only the current handoff, not the full timeline or source history.
+- The user works and decides normally; the AI owns lookup, maintenance, and write-back.
+- Full history is read only for first-time reconstruction, an explicit audit, or a conflict that targeted lookup cannot resolve.
+- Validation scripts check structure only; they do not certify memory, business results, or user experience.
 - Project facts must come from the project's own registered records, not from global memory, old tasks, or outside material.
 
 ### Repository layout

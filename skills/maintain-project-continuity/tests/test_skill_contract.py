@@ -1,12 +1,13 @@
 from __future__ import annotations
 
+import importlib.util
 import json
-import re
 import subprocess
 import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 
 SKILL_ROOT = Path(__file__).resolve().parent.parent
@@ -24,48 +25,23 @@ class SkillContractTests(unittest.TestCase):
             capture_output=True,
             text=True,
             encoding="utf-8",
+            errors="replace",
             check=False,
         )
 
-    def test_natural_start_and_closure_contract_is_explicit(self) -> None:
+    def test_ordinary_start_is_lightweight_and_user_owned_work_stays_primary(self) -> None:
         skill = (SKILL_ROOT / "SKILL.md").read_text(encoding="utf-8-sig")
-        self.assertIn("Storage model", skill)
-        self.assertIn("belong inside that project's own repository", skill)
-        self.assertIn("Activation contract", skill)
-        self.assertIn("first project-related turn", skill)
-        self.assertIn("merely wiring the skill is not activation", skill)
-        self.assertIn("genuinely fresh task that does not name the skill", skill)
-        self.assertIn("current fresh conversation is the cold-start acceptance task", skill)
-        self.assertIn("handoff-pending", skill)
-        self.assertIn("required second handoff", skill)
-        self.assertIn("asking for a third fresh task fails", skill)
-        self.assertIn("A one-sentence status reply", skill)
-        self.assertIn("explicitly covers all nine items", skill)
-        self.assertIn("exact authorization and prohibition boundary", skill)
-        self.assertIn("this current conversation is performing the cold-start recovery now", skill)
-        self.assertIn("Do not read global memory, old tasks, the internet", skill)
-        self.assertIn("canonical global skill", skill)
-        self.assertIn("inspect its actual tool/source trace", skill)
-        self.assertIn("additional project business documents not named by the manifest", skill)
-        self.assertIn("not \"preserve continuity\"", skill)
-        self.assertIn("Never let the continuity mechanism replace the project's purpose", skill)
-        self.assertIn("Natural-language trigger gate", skill)
-        self.assertIn("does not need to name or select the skill", skill)
-        self.assertIn("Match the user's intent, not a literal substring", skill)
-        self.assertIn("first project-related turn in every conversation", BLOCK)
-        self.assertIn("is not activation complete", BLOCK)
-        self.assertIn("this fresh conversation is the cold-start test", BLOCK)
-        self.assertIn("this fresh conversation is the required second handoff", BLOCK)
-        self.assertIn("Do not restart the first test or ask for a third fresh task", BLOCK)
-        self.assertIn("allowed process instructions, not factual sources", BLOCK)
-        self.assertIn("actual tool/source trace", BLOCK)
-        self.assertIn("explicitly check nine items", BLOCK)
-        self.assertIn("this current conversation is performing the test now", BLOCK)
-        self.assertIn("target project's domain goal and user-facing deliverables", BLOCK)
-        self.assertIn("Invoke it automatically before the final response", BLOCK)
-        self.assertIn("Match intent rather than a literal keyword", BLOCK)
+        self.assertIn("read only the current handoff", skill)
+        self.assertIn("Do not begin an ordinary conversation with a project-history recital", skill)
+        self.assertIn("never turns an ordinary start into a cold-start exam", skill)
+        self.assertIn("The user does not need to request or supervise this bookkeeping", skill)
+        self.assertIn("read only the current handoff", BLOCK)
+        self.assertIn("do not give the user a recovery report unless asked", BLOCK)
+        self.assertNotIn("explicitly covers all nine items", skill)
+        self.assertNotIn("current fresh conversation is the cold-start acceptance task", skill)
+        self.assertNotIn("this fresh conversation is the cold-start test", BLOCK)
 
-    def test_rules_only_updates_block_and_preserves_manifest(self) -> None:
+    def test_first_registration_and_rules_only_update_are_safe_and_idempotent(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
             project = Path(temp)
             (project / "AGENTS.md").write_text("# Existing rules\n\nKeep this text.\n", encoding="utf-8")
@@ -74,95 +50,254 @@ class SkillContractTests(unittest.TestCase):
                 str(project),
                 "--project-name",
                 "Fixture",
-                "--state",
-                "registered",
                 "--note",
                 "preserve me",
             )
             self.assertEqual(registered.returncode, 0, registered.stderr)
+            self.assertNotIn("activation_complete", registered.stdout)
+
             manifest_path = project / ".codex" / "project-continuity.json"
             original_manifest = manifest_path.read_bytes()
-
             agents_path = project / "AGENTS.md"
-            agents = agents_path.read_text(encoding="utf-8-sig")
-            stale = f"{START}\nold managed text\n{END}"
-            agents = re.sub(re.escape(START) + r".*?" + re.escape(END), stale, agents, count=1, flags=re.DOTALL)
-            agents_path.write_text(agents, encoding="utf-8", newline="\n")
+            first_agents = agents_path.read_bytes()
 
             updated = self.run_script(INSTALLER, str(project), "--rules-only")
             self.assertEqual(updated.returncode, 0, updated.stderr)
             self.assertEqual(manifest_path.read_bytes(), original_manifest)
-            updated_agents = agents_path.read_text(encoding="utf-8-sig")
-            self.assertIn("Keep this text.", updated_agents)
-            self.assertIn(BLOCK, updated_agents)
-            self.assertEqual(updated_agents.count(START), 1)
-
-            first_update = agents_path.read_bytes()
-            repeated = self.run_script(INSTALLER, str(project), "--rules-only")
-            self.assertEqual(repeated.returncode, 0, repeated.stderr)
-            self.assertEqual(agents_path.read_bytes(), first_update)
+            self.assertEqual(agents_path.read_bytes(), first_agents)
+            self.assertIn("Keep this text.", agents_path.read_text(encoding="utf-8-sig"))
+            self.assertEqual(agents_path.read_text(encoding="utf-8-sig").count(START), 1)
 
             checked = self.run_script(VALIDATOR, str(project))
+            result = json.loads(checked.stdout)
             self.assertEqual(checked.returncode, 0, checked.stdout + checked.stderr)
-            self.assertTrue(json.loads(checked.stdout)["ok"])
+            self.assertTrue(result["structure_ok"])
+            self.assertEqual(result["scope"], "structure_only")
+            self.assertEqual(result["output_schema_version"], 1)
+            self.assertNotIn("activation_complete", result)
 
-    def test_rules_only_rejects_an_unregistered_project(self) -> None:
+    def test_normal_rerun_cannot_overwrite_an_existing_manifest(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            project = Path(temp)
+            first = self.run_script(INSTALLER, str(project), "--project-name", "Fixture", "--note", "keep")
+            self.assertEqual(first.returncode, 0, first.stderr)
+            agents_path = project / "AGENTS.md"
+            manifest_path = project / ".codex" / "project-continuity.json"
+            original_agents = agents_path.read_bytes()
+            original_manifest = manifest_path.read_bytes()
+
+            repeated = self.run_script(INSTALLER, str(project), "--project-name", "Changed")
+            self.assertNotEqual(repeated.returncode, 0)
+            self.assertEqual(agents_path.read_bytes(), original_agents)
+            self.assertEqual(manifest_path.read_bytes(), original_manifest)
+
+    def test_duplicate_or_incomplete_managed_blocks_are_not_silently_accepted(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            project = Path(temp)
+            registered = self.run_script(INSTALLER, str(project), "--project-name", "Fixture")
+            self.assertEqual(registered.returncode, 0, registered.stderr)
+            agents_path = project / "AGENTS.md"
+            agents_path.write_text(
+                agents_path.read_text(encoding="utf-8-sig") + "\n" + BLOCK + "\n",
+                encoding="utf-8",
+            )
+            duplicate_bytes = agents_path.read_bytes()
+
+            checked = self.run_script(VALIDATOR, str(project))
+            result = json.loads(checked.stdout)
+            self.assertNotEqual(checked.returncode, 0)
+            self.assertFalse(result["structure_ok"])
+            self.assertTrue(any("exactly one complete continuity block" in error for error in result["errors"]))
+
+            update = self.run_script(INSTALLER, str(project), "--rules-only")
+            self.assertNotEqual(update.returncode, 0)
+            self.assertEqual(agents_path.read_bytes(), duplicate_bytes)
+
+    def test_reversed_markers_are_rejected_and_stale_blocks_are_detected(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            project = Path(temp)
+            registered = self.run_script(INSTALLER, str(project), "--project-name", "Fixture")
+            self.assertEqual(registered.returncode, 0, registered.stderr)
+            agents_path = project / "AGENTS.md"
+
+            reversed_text = f"# Rules\n\n{END}\nold text\n{START}\n"
+            agents_path.write_text(reversed_text, encoding="utf-8")
+            reversed_bytes = agents_path.read_bytes()
+            update = self.run_script(INSTALLER, str(project), "--rules-only")
+            self.assertNotEqual(update.returncode, 0)
+            self.assertEqual(agents_path.read_bytes(), reversed_bytes)
+            checked = self.run_script(VALIDATOR, str(project))
+            reversed_result = json.loads(checked.stdout)
+            self.assertNotEqual(checked.returncode, 0)
+            self.assertTrue(any("reversed or malformed" in error for error in reversed_result["errors"]))
+
+            stale_text = f"# Rules\n\n{START}\nold managed rules\n{END}\n"
+            agents_path.write_text(stale_text, encoding="utf-8")
+            stale_check = self.run_script(VALIDATOR, str(project))
+            stale_result = json.loads(stale_check.stdout)
+            self.assertNotEqual(stale_check.returncode, 0)
+            self.assertTrue(any("out of date" in error for error in stale_result["errors"]))
+
+            repaired = self.run_script(INSTALLER, str(project), "--rules-only")
+            self.assertEqual(repaired.returncode, 0, repaired.stderr)
+            final_check = self.run_script(VALIDATOR, str(project))
+            self.assertEqual(final_check.returncode, 0, final_check.stdout + final_check.stderr)
+
+    def test_failed_manifest_creation_does_not_change_agents(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
             project = Path(temp)
             agents_path = project / "AGENTS.md"
-            agents_path.write_text("# Existing rules\n", encoding="utf-8")
+            agents_path.write_text("# Existing rules\n\nKeep exactly.\n", encoding="utf-8")
             original_agents = agents_path.read_bytes()
-            result = self.run_script(INSTALLER, str(project), "--rules-only")
+            (project / ".codex").write_text("this blocks directory creation", encoding="utf-8")
+
+            result = self.run_script(INSTALLER, str(project), "--project-name", "Fixture")
             self.assertNotEqual(result.returncode, 0)
             self.assertEqual(agents_path.read_bytes(), original_agents)
-            self.assertFalse((project / ".codex").exists())
+            self.assertTrue((project / ".codex").is_file())
 
-    def test_cold_start_state_requires_complete_records(self) -> None:
+    def test_registration_rollback_preserves_a_preexisting_empty_codex_directory(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
             project = Path(temp)
-            result = self.run_script(
+            agents_path = project / "AGENTS.md"
+            agents_path.write_text("# Existing rules\n\nKeep exactly.\n", encoding="utf-8")
+            original_agents = agents_path.read_bytes()
+            codex_dir = project / ".codex"
+            codex_dir.mkdir()
+
+            spec = importlib.util.spec_from_file_location("installer_under_test", INSTALLER)
+            assert spec is not None and spec.loader is not None
+            installer = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(installer)
+            real_write_text = installer.write_text
+            write_count = 0
+
+            def fail_second_write(path: Path, content: str) -> None:
+                nonlocal write_count
+                write_count += 1
+                if write_count == 2:
+                    raise OSError("simulated AGENTS write failure")
+                real_write_text(path, content)
+
+            argv = [str(INSTALLER), str(project), "--project-name", "Fixture"]
+            with mock.patch.object(sys, "argv", argv), mock.patch.object(
+                installer, "write_text", side_effect=fail_second_write
+            ), self.assertRaises(OSError):
+                installer.main()
+
+            self.assertTrue(codex_dir.is_dir())
+            self.assertEqual(list(codex_dir.iterdir()), [])
+            self.assertEqual(agents_path.read_bytes(), original_agents)
+
+    def test_declared_high_state_is_never_reported_as_memory_or_business_acceptance(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            project = Path(temp)
+            for name in ("timeline.md", "handoff.md"):
+                (project / name).write_text(f"# {name}\n\nplaceholder\n", encoding="utf-8")
+            registered = self.run_script(
                 INSTALLER,
                 str(project),
                 "--project-name",
                 "Fixture",
                 "--state",
                 "cold-start-validated",
+                "--timeline",
+                "timeline.md",
+                "--handoff",
+                "handoff.md",
             )
-            self.assertEqual(result.returncode, 0, result.stderr)
-            checked = self.run_script(VALIDATOR, str(project))
-            self.assertNotEqual(checked.returncode, 0)
-            errors = json.loads(checked.stdout)["errors"]
-            self.assertTrue(any("source_index is required" in error for error in errors))
-            self.assertTrue(any("acceptance is required" in error for error in errors))
+            self.assertEqual(registered.returncode, 0, registered.stderr)
+            self.assertNotIn("activation_complete", registered.stdout)
 
-    def test_handoff_pending_requires_acceptance_and_is_not_active(self) -> None:
+            checked = self.run_script(VALIDATOR, str(project))
+            result = json.loads(checked.stdout)
+            self.assertEqual(checked.returncode, 0, checked.stdout + checked.stderr)
+            self.assertTrue(result["structure_ok"])
+            self.assertEqual(result["declared_state"], "cold-start-validated")
+            self.assertEqual(result["output_schema_version"], 1)
+            self.assertNotIn("activation_complete", result)
+            self.assertEqual(
+                result["not_checked"],
+                ["source_fidelity", "memory_accuracy", "business_completion", "user_path"],
+            )
+
+    def test_shared_record_paths_warn_and_empty_records_fail(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
             project = Path(temp)
-            for name in ("overview.md", "timeline.md", "handoff.md", "sources.md", "acceptance.md"):
-                (project / name).write_text(name, encoding="utf-8")
-            result = self.run_script(
+            (project / "empty.md").write_text("", encoding="utf-8")
+            registered = self.run_script(
                 INSTALLER,
                 str(project),
                 "--project-name",
                 "Fixture",
                 "--state",
-                "handoff-pending",
-                "--overview",
-                "overview.md",
+                "bootstrapped",
                 "--timeline",
-                "timeline.md",
+                "empty.md",
                 "--handoff",
-                "handoff.md",
-                "--source-index",
-                "sources.md",
-                "--acceptance",
-                "acceptance.md",
+                "empty.md",
             )
-            self.assertEqual(result.returncode, 0, result.stderr)
-            self.assertFalse(json.loads(result.stdout)["activation_complete"])
+            self.assertEqual(registered.returncode, 0, registered.stderr)
+
             checked = self.run_script(VALIDATOR, str(project))
-            self.assertEqual(checked.returncode, 0, checked.stdout + checked.stderr)
-            self.assertFalse(json.loads(checked.stdout)["activation_complete"])
+            result = json.loads(checked.stdout)
+            self.assertNotEqual(checked.returncode, 0)
+            self.assertFalse(result["structure_ok"])
+            self.assertTrue(any("is empty" in error for error in result["errors"]))
+            self.assertTrue(any("share the same file" in warning for warning in result["warnings"]))
+
+    def test_malformed_records_and_unreadable_agents_are_reported_as_structure_errors(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            project = Path(temp)
+            registered = self.run_script(INSTALLER, str(project), "--project-name", "Fixture")
+            self.assertEqual(registered.returncode, 0, registered.stderr)
+            manifest_path = project / ".codex" / "project-continuity.json"
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+            manifest["records"] = []
+            manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+
+            malformed = self.run_script(VALIDATOR, str(project))
+            malformed_result = json.loads(malformed.stdout)
+            self.assertNotEqual(malformed.returncode, 0)
+            self.assertTrue(any("records must be an object" in error for error in malformed_result["errors"]))
+
+            (project / "AGENTS.md").write_bytes(b"")
+            empty = self.run_script(VALIDATOR, str(project))
+            empty_result = json.loads(empty.stdout)
+            self.assertNotEqual(empty.returncode, 0)
+            self.assertTrue(any("AGENTS.md is empty" in error for error in empty_result["errors"]))
+
+            (project / "AGENTS.md").write_bytes(b"\xff\xfe\x00")
+            unreadable = self.run_script(VALIDATOR, str(project))
+            unreadable_result = json.loads(unreadable.stdout)
+            self.assertNotEqual(unreadable.returncode, 0)
+            self.assertTrue(any("AGENTS.md is unreadable" in error for error in unreadable_result["errors"]))
+
+    def test_manifest_root_and_project_name_must_be_valid(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            project = Path(temp)
+            registered = self.run_script(INSTALLER, str(project), "--project-name", "Fixture")
+            self.assertEqual(registered.returncode, 0, registered.stderr)
+            manifest_path = project / ".codex" / "project-continuity.json"
+
+            manifest_path.write_text("[]", encoding="utf-8")
+            array_result = self.run_script(VALIDATOR, str(project))
+            array_data = json.loads(array_result.stdout)
+            self.assertNotEqual(array_result.returncode, 0)
+            self.assertTrue(any("root must be an object" in error for error in array_data["errors"]))
+
+            manifest = {
+                "schema_version": 1,
+                "skill": "maintain-project-continuity",
+                "project": "",
+                "state": "registered",
+                "records": {},
+            }
+            manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+            blank_project = self.run_script(VALIDATOR, str(project))
+            blank_data = json.loads(blank_project.stdout)
+            self.assertNotEqual(blank_project.returncode, 0)
+            self.assertTrue(any("project must be a non-empty string" in error for error in blank_data["errors"]))
 
 
 if __name__ == "__main__":

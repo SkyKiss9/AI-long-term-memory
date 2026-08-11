@@ -2,18 +2,10 @@
 
 Updated: YYYY-MM-DD
 
-## Read first
-
 ## Current position
 
-## Recent change
+## Latest material change and source
 
-## Still valid
-
-## Superseded or reopened
-
-## Unconfirmed and unauthorized
+## Current boundary or blocker
 
 ## Next authorized work
-
-## Completion test
