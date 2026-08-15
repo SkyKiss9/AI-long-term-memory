@@ -1,0 +1,23 @@
+{
+  "name": "@skykiss9/dsh-continuity",
+  "version": "0.1.0",
+  "description": "AI Long-Term Memory project continuity as a DeepSeek Harness (dsh) bundle: handoff-first continuation, targeted lookup, auto write-back.",
+  "license": "MIT",
+  "type": "module",
+  "main": "scripts/install.mjs",
+  "exports": {
+    ".": "./scripts/install.mjs",
+    "./cordis.patch.yml": "./cordis.patch.yml",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "cordis.patch.yml",
+    "scripts",
+    "skills"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  }
+}

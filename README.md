@@ -1,11 +1,13 @@
-# AI长期记忆 / AI Long-Term Memory
+# AI Long-Term Memory — Project Continuity for Codex & DeepSeek Harness
 
-> 脱敏双语版 Codex 长期项目连续性技能  
-> A redacted bilingual Codex continuity skill for long-running projects
+> 给 Codex 和 DeepSeek Harness (dsh) 的长期项目连续性技能 · 脱敏公开版  
+> A redacted bilingual project-continuity skill for Codex agents and DeepSeek Harness (dsh)
+
+`Codex Skill` · `DeepSeek Harness Plugin` · `dsh` · `AGENTS.md` · `Project Continuity` · `Long-Term Memory`
 
 ## 中文说明
 
-这是一个给 Codex 长期项目使用的连续性技能。它解决的不是“怎么写一段交接摘要”，而是“当新对话没有旧上下文时，怎样准确恢复项目目标、演变、用户决定、决定理由、边界、当前状态和下一步”。
+这是一个给 Codex 和 DeepSeek Harness (dsh) 长期项目使用的连续性技能。它解决的不是“怎么写一段交接摘要”，而是“当新对话没有旧上下文时，怎样准确恢复项目目标、演变、用户决定、决定理由、边界、当前状态和下一步”。
 
 这个公开版本已经脱敏，只保留通用方法和通用工具，不包含任何真实项目记录、业务数据、历史对话、账号信息、日志、凭证或私有仓库内容。
 
@@ -28,7 +30,7 @@
 - 首次建档、完整历史审计和多轮失真复核：属于专项工作，才读取完整来源。
 - 清单里的状态只是历史说明，不能自动把普通对话变成考试。
 
-### 30秒快速开始
+### 30秒快速开始（Codex）
 
 1. 把 `skills/maintain-project-continuity` 放进你的 Codex 技能目录。
 2. 在目标项目里登记 `.codex/project-continuity.json`。
@@ -44,6 +46,14 @@ python skills/maintain-project-continuity/scripts/install_project.py <project-ro
 python skills/maintain-project-continuity/scripts/validate_project.py <project-root>
 ```
 
+### DeepSeek Harness (dsh) 快速开始
+
+1. 在本仓库目录运行 `dsh plugin --profile web add ./dsh-plugin`。
+2. 运行 `node node_modules/@skykiss9/dsh-continuity/scripts/install.mjs` 把技能装进 dsh 用户技能目录。
+3. 重启 `dsh web`（或新开会话），接续技能即可在技能列表中使用。
+
+> Windows 注意：`dsh plugin add` 的本地路径不能含空格；如果仓库路径含空格，先把 `dsh-plugin` 目录复制到无空格路径（例如 `C:\dsh-continuity`）再执行安装。
+
 ### 这个仓库包含什么
 
 - 通用技能正文
@@ -53,6 +63,7 @@ python skills/maintain-project-continuity/scripts/validate_project.py <project-r
 - 通用校验脚本
 - 一个脱敏示例清单
 - 技能契约测试
+- `dsh-plugin/`：DeepSeek Harness (dsh) 插件包
 
 ### 这个仓库不包含什么
 
@@ -82,17 +93,18 @@ python skills/maintain-project-continuity/scripts/validate_project.py <project-r
 - `skills/maintain-project-continuity/references/`：方法说明
 - `skills/maintain-project-continuity/scripts/`：安装与校验脚本
 - `skills/maintain-project-continuity/tests/`：契约测试
+- `dsh-plugin/`：DeepSeek Harness (dsh) 插件包
 
 ### 公开命名
 
-这个公开仓库使用展示名 **AI长期记忆 / AI Long-Term Memory**。  
+这个公开仓库使用展示名 **AI Long-Term Memory（AI长期记忆）**，面向 Codex 与 DeepSeek Harness (dsh)。  
 为了兼容已有触发方式，技能内部技术名仍然保留为 `maintain-project-continuity`。
 
 ---
 
 ## English
 
-This is a continuity skill for long-running Codex projects. It does not try to solve “how to write a short handoff summary”. It solves “how a fresh conversation can accurately recover the project goal, evolution, user decisions, decision rationale, boundaries, current state, and next step without inheriting hidden context”.
+This is a continuity skill for long-running projects in **Codex and DeepSeek Harness (dsh)**. It does not try to solve “how to write a short handoff summary”. It solves “how a fresh conversation can accurately recover the project goal, evolution, user decisions, decision rationale, boundaries, current state, and next step without inheriting hidden context”.
 
 This public version is fully redacted. It keeps only the generic method and generic tooling. It does not include real project notebooks, business data, conversation archives, account information, logs, credentials, or private repository content.
 
@@ -115,7 +127,7 @@ This public version is fully redacted. It keeps only the generic method and gene
 - First-time reconstruction, full-history audits, and multi-round drift studies are special verification work.
 - Manifest states are historical labels, not a router that turns ordinary conversations into exams.
 
-### 30-second quick start
+### 30-second quick start (Codex)
 
 1. Put `skills/maintain-project-continuity` in your Codex skills directory.
 2. Register `.codex/project-continuity.json` inside the target project.
@@ -131,6 +143,14 @@ python skills/maintain-project-continuity/scripts/install_project.py <project-ro
 python skills/maintain-project-continuity/scripts/validate_project.py <project-root>
 ```
 
+### DeepSeek Harness (dsh) quick start
+
+1. From this repository checkout, run `dsh plugin --profile web add ./dsh-plugin`.
+2. Run `node node_modules/@skykiss9/dsh-continuity/scripts/install.mjs` to install the skill into the dsh user skill root.
+3. Restart `dsh web` (or start a new session); the continuity skill appears in the skill list.
+
+> Windows note: `dsh plugin add` cannot take a local path containing spaces. If your checkout path contains spaces, copy the `dsh-plugin` directory to a space-free path (e.g. `C:\dsh-continuity`) first, then install from there.
+
 ### What this repository includes
 
 - The generic skill body
@@ -140,6 +160,7 @@ python skills/maintain-project-continuity/scripts/validate_project.py <project-r
 - A generic validation script
 - A redacted example manifest
 - Contract tests for the skill
+- `dsh-plugin/`: a DeepSeek Harness (dsh) plugin bundle
 
 ### What this repository does not include
 
@@ -169,8 +190,9 @@ python skills/maintain-project-continuity/scripts/validate_project.py <project-r
 - `skills/maintain-project-continuity/references/`: method notes
 - `skills/maintain-project-continuity/scripts/`: install and validation scripts
 - `skills/maintain-project-continuity/tests/`: contract tests
+- `dsh-plugin/`: DeepSeek Harness (dsh) plugin bundle
 
 ### Public naming
 
-This public repository uses the display name **AI长期记忆 / AI Long-Term Memory**.  
+This public repository uses the display name **AI Long-Term Memory (AI长期记忆)**, for Codex and DeepSeek Harness (dsh).  
 For compatibility with existing triggers, the internal technical skill name remains `maintain-project-continuity`.

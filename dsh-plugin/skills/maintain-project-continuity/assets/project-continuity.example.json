@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "skill": "maintain-project-continuity",
+  "project": "example",
+  "state": "registered",
+  "records": {
+    "overview": null,
+    "timeline": null,
+    "handoff": null,
+    "source_index": null,
+    "acceptance": null
+  },
+  "installed_on": "YYYY-MM-DD",
+  "note": "Ordinary continuation reads the current handoff first and expands to older records only when needed."
+}
