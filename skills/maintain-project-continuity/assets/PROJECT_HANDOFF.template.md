@@ -2,10 +2,8 @@
 
 Updated: YYYY-MM-DD
 
-## Current position
+Current:
 
-## Latest material change and source
+Boundary:
 
-## Current boundary or blocker
-
-## Next authorized work
+Next authorized work:

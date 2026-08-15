@@ -28,16 +28,17 @@ A manifest state is descriptive history. It never turns an ordinary start into a
 
 - Original conversations and actual files, commits, pages, logs, or runtime results prove what happened.
 - Do not use global memory, unrelated old tasks, or internet material as substitute project evidence.
-- The timeline explains changes in order and points directly to the source from that same round.
-- The handoff is only a bookmark: current position, latest material change and source, current boundary, and next authorized work.
+- The timeline is a light chronological notebook. A normal entry is one or two lines: when something materially changed, what changed, and where to find the direct source. Include the reason only when it matters.
+- The handoff is a short bookmark: current position, current boundary, and next authorized work. It may mention a pending decision when one is active, but it does not retell project history.
 - Keep user decisions, assistant suggestions, implementation choices, external facts, verification results, and pending questions separate.
-- Preserve earlier decisions and reasons. When they change, append the new decision and source; do not silently rewrite history.
+- Preserve earlier decisions and reasons. When they change, append a short new entry and source instead of rewriting history; point to the old entry only when the change would otherwise be unclear.
 - Missing or unreadable evidence stays marked as a gap. Do not turn a summary into substitute evidence.
 
 ## Automatic write-back
 
-- On a genuine project closure, or after material progress that changes the continuation point, append a concise timeline entry linked to the current conversation and update the handoff.
-- Record what changed, why, the actual result, remaining limits, and whether the user made a new decision.
+- On a genuine project closure, or after material progress that changes the continuation point, append one short timeline note linked to the current conversation, file, commit, or runtime evidence, then refresh the handoff.
+- Write naturally rather than filling a report template. Keep only the details another person or AI needs to locate the source and continue safely.
+- Replace stale handoff details instead of accumulating history there.
 - If nothing material changed, do not rewrite the records.
 - The user does not need to request or supervise this bookkeeping.
 

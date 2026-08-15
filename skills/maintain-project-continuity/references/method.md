@@ -15,15 +15,14 @@ The user does not maintain this system. The AI records material changes and thei
 ## What the handoff contains
 
 - Current position
-- Latest material change and its direct source
 - Current boundary or blocker
 - Next authorized work
 
-It is a bookmark, not a second project history.
+It is a short bookmark, not a second project history. Replace stale details instead of accumulating them.
 
 ## What the timeline contains
 
-Each material round records its direct conversation or runtime source, what changed and why, the actual result, and what remains. Clear user decisions do not need a separate confirmation ceremony. Later changes are appended rather than written over earlier decisions.
+The timeline is a light chronological notebook. A normal entry is one or two lines: date, what materially changed, and the direct conversation, file, commit, page, log, or runtime result. Add the reason only when it helps explain the change. Later changes are appended rather than written over earlier decisions.
 
 ## When full history is appropriate
 

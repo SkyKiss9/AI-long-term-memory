@@ -17,7 +17,7 @@
 
 ### 它怎么工作
 
-1. 原始材料保留事实，时间线记录变化和理由，当前交接只作为书签。
+1. 原始材料保留事实，时间线用一两行记录变化和来源，当前交接只作为书签。
 2. 普通新对话只读当前交接，然后直接处理用户的工作。
 3. 信息不足或冲突时，AI按引用局部回查；不默认加载完整历史。
 4. 有实质变化时由AI自动写回，用户不需要管理记忆系统。
@@ -64,8 +64,8 @@ python skills/maintain-project-continuity/scripts/validate_project.py <project-r
 ### 核心方法
 
 1. 原始材料证明事实。
-2. 时间线记录变化、理由和本轮直接来源。
-3. 当前交接只指向当前位置和下一项已授权工作。
+2. 时间线只记日期、实质变化和直接来源；理由仅在确有必要时补一句。
+3. 当前交接只保留当前位置、边界和下一项已授权工作，不积累历史。
 
 ### 技能里最关键的几个约束
 
@@ -104,7 +104,7 @@ This public version is fully redacted. It keeps only the generic method and gene
 
 ### How it works
 
-1. Original sources preserve facts, the timeline records changes and reasons, and the handoff is only a bookmark.
+1. Original sources preserve facts, the timeline records each material change and source in one or two lines, and the handoff is only a bookmark.
 2. An ordinary fresh conversation reads the current handoff and starts the user's work.
 3. When something is missing or contradictory, the AI follows targeted references instead of loading all history.
 4. The AI writes back material changes automatically; the user does not administer the memory system.
@@ -151,8 +151,8 @@ python skills/maintain-project-continuity/scripts/validate_project.py <project-r
 ### Core method
 
 1. Original sources prove facts.
-2. The timeline records changes, reasons, and direct sources.
-3. The handoff points only to the current position and next authorized work.
+2. The timeline records only the date, material change, and direct source; add a reason only when it matters.
+3. The handoff keeps only the current position, boundary, and next authorized work instead of accumulating history.
 
 ### The most important rules
 

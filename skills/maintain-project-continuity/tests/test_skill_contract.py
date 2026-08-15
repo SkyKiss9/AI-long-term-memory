@@ -31,12 +31,23 @@ class SkillContractTests(unittest.TestCase):
 
     def test_ordinary_start_is_lightweight_and_user_owned_work_stays_primary(self) -> None:
         skill = (SKILL_ROOT / "SKILL.md").read_text(encoding="utf-8-sig")
+        handoff_template = (SKILL_ROOT / "assets" / "PROJECT_HANDOFF.template.md").read_text(encoding="utf-8-sig")
+        timeline_template = (SKILL_ROOT / "assets" / "PROJECT_TIMELINE.template.md").read_text(encoding="utf-8-sig")
         self.assertIn("read only the current handoff", skill)
         self.assertIn("Do not begin an ordinary conversation with a project-history recital", skill)
         self.assertIn("never turns an ordinary start into a cold-start exam", skill)
         self.assertIn("The user does not need to request or supervise this bookkeeping", skill)
+        self.assertIn("one or two lines", skill)
+        self.assertIn("Replace stale handoff details", skill)
         self.assertIn("read only the current handoff", BLOCK)
         self.assertIn("do not give the user a recovery report unless asked", BLOCK)
+        self.assertIn("append one short timeline note", BLOCK)
+        self.assertEqual(
+            [line for line in handoff_template.splitlines() if line.endswith(":")],
+            ["Current:", "Boundary:", "Next authorized work:"],
+        )
+        self.assertIn("What materially changed", timeline_template)
+        self.assertLessEqual(len(timeline_template.splitlines()), 3)
         self.assertNotIn("explicitly covers all nine items", skill)
         self.assertNotIn("current fresh conversation is the cold-start acceptance task", skill)
         self.assertNotIn("this fresh conversation is the cold-start test", BLOCK)
