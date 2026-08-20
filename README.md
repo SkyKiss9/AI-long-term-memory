@@ -49,10 +49,13 @@ python skills/maintain-project-continuity/scripts/validate_project.py <project-r
 ### DeepSeek Harness (dsh) 快速开始
 
 1. 在本仓库目录运行 `dsh plugin --profile web add ./dsh-plugin`。
-2. 运行 `node node_modules/@skykiss9/dsh-continuity/scripts/install.mjs` 把技能装进 dsh 用户技能目录。
-3. 重启 `dsh web`（或新开会话），接续技能即可在技能列表中使用。
+2. 运行 `node ./dsh-plugin/scripts/install.mjs`，把标准 `SKILL.md` 技能包安装到 dsh 用户技能目录 `$DSH_HOME/skills/maintain-project-continuity`（默认是 `~/.dsh/skills/maintain-project-continuity`）。安装会先暂存完整目录，再整体替换旧版本；如果激活失败，会回滚旧目录，因此旧版本遗留文件不会继续保留。
+3. `cordis.patch.yml` 有意保持为空，因为不需要挂载 Cordis runtime row。
+4. 重启 `dsh web`（或新开会话），接续技能即可在技能列表中使用。
 
 > Windows 注意：`dsh plugin add` 的本地路径不能含空格；如果仓库路径含空格，先把 `dsh-plugin` 目录复制到无空格路径（例如 `C:\dsh-continuity`）再执行安装。
+
+清单状态为 `registered` 时，只表示清单和规则已经安装；只有目标项目存在可用的时间线和当前交接，校验结果才会报告 `continuation_ready: true`。
 
 ### 这个仓库包含什么
 
@@ -146,10 +149,13 @@ python skills/maintain-project-continuity/scripts/validate_project.py <project-r
 ### DeepSeek Harness (dsh) quick start
 
 1. From this repository checkout, run `dsh plugin --profile web add ./dsh-plugin`.
-2. Run `node node_modules/@skykiss9/dsh-continuity/scripts/install.mjs` to install the skill into the dsh user skill root.
-3. Restart `dsh web` (or start a new session); the continuity skill appears in the skill list.
+2. Run `node ./dsh-plugin/scripts/install.mjs` to install the standard `SKILL.md` bundle into `$DSH_HOME/skills/maintain-project-continuity` (default `~/.dsh/skills/maintain-project-continuity`). Reinstall stages a complete copy and swaps the whole skill directory, removing stale files from older versions; if activation fails, the previous directory is restored.
+3. `cordis.patch.yml` is intentionally empty because no mounted Cordis runtime row is required.
+4. Restart `dsh web` (or start a new session); the continuity skill appears in the skill list.
 
 > Windows note: `dsh plugin add` cannot take a local path containing spaces. If your checkout path contains spaces, copy the `dsh-plugin` directory to a space-free path (e.g. `C:\dsh-continuity`) first, then install from there.
+
+`registered` means that the manifest and rules are installed; it does not mean ordinary continuation is ready. A usable timeline and current handoff are also required for `continuation_ready: true`.
 
 ### What this repository includes
 

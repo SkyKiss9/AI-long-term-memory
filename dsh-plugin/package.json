@@ -1,7 +1,7 @@
 {
   "name": "@skykiss9/dsh-continuity",
-  "version": "0.1.0",
-  "description": "AI Long-Term Memory project continuity as a DeepSeek Harness (dsh) bundle: handoff-first continuation, targeted lookup, auto write-back.",
+  "version": "0.2.0",
+  "description": "AI Long-Term Memory project continuity for DeepSeek Harness: handoff-first continuation, targeted lookup, and safe write-back.",
   "license": "MIT",
   "type": "module",
   "main": "scripts/install.mjs",
