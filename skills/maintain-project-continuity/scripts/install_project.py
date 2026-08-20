@@ -9,7 +9,7 @@ import os
 import re
 import tempfile
 from datetime import date
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 
 SKILL = "maintain-project-continuity"
@@ -17,6 +17,7 @@ START = f"<!-- {SKILL}:start -->"
 END = f"<!-- {SKILL}:end -->"
 BLOCK_PATH = Path(__file__).resolve().parent.parent / "assets" / "AGENTS.continuity.block.md"
 STATES = {"registered", "bootstrapped", "handoff-pending", "cold-start-validated", "live-validated"}
+WINDOWS_DRIVE = re.compile(r"^[A-Za-z]:")
 
 
 def read_text(path: Path) -> str:
@@ -47,15 +48,33 @@ def write_text(path: Path, content: str) -> None:
 
 
 def relative_file(project: Path, value: str | None) -> str | None:
-    if not value:
+    """Normalize a manifest record path to portable POSIX form and keep it inside project."""
+    if value is None:
         return None
-    candidate = Path(value.replace("/", "\\"))
-    if candidate.is_absolute() or ".." in candidate.parts:
+    raw = value.strip()
+    if not raw:
+        return None
+
+    portable = raw.replace("\\", "/")
+    if portable.startswith("/") or portable.startswith("//") or WINDOWS_DRIVE.match(portable):
         raise ValueError(f"record path must stay inside the project: {value}")
-    resolved = (project / candidate).resolve()
-    if project.resolve() not in resolved.parents and resolved != project.resolve():
-        raise ValueError(f"record path escapes the project: {value}")
-    return str(candidate).replace("\\", "/")
+
+    logical = PurePosixPath(portable)
+    if logical.is_absolute() or any(part == ".." for part in logical.parts):
+        raise ValueError(f"record path must stay inside the project: {value}")
+
+    parts = [part for part in logical.parts if part not in ("", ".")]
+    if not parts:
+        raise ValueError(f"record path must name a file inside the project: {value}")
+
+    resolved_project = project.resolve()
+    resolved = resolved_project.joinpath(*parts).resolve()
+    try:
+        resolved.relative_to(resolved_project)
+    except ValueError as exc:
+        raise ValueError(f"record path escapes the project: {value}") from exc
+
+    return PurePosixPath(*parts).as_posix()
 
 
 def render_agents(project: Path) -> tuple[Path, str]:
@@ -163,6 +182,9 @@ def main() -> int:
     except (ValueError, UnicodeError) as exc:
         parser.error(str(exc))
 
+    if args.state != "registered" and (not records["timeline"] or not records["handoff"]):
+        parser.error(f"--state {args.state} requires both --timeline and --handoff")
+
     manifest = {
         "schema_version": 1,
         "skill": SKILL,
@@ -190,11 +212,9 @@ def main() -> int:
     original_agents = agents_path.read_bytes() if agents_path.exists() else None
     manifest_parent_existed = manifest_path.parent.exists()
     try:
-        # Write the manifest first. If its directory is unavailable, AGENTS.md stays untouched.
         write_text(manifest_path, json.dumps(manifest, ensure_ascii=False, indent=2))
         write_text(rendered_agents_path, rendered_agents)
     except Exception:
-        # Roll back both sides of the two-file registration.
         try:
             if original_agents is None:
                 agents_path.unlink(missing_ok=True)
@@ -213,6 +233,7 @@ def main() -> int:
                 "project": args.project_name,
                 "declared_state": args.state,
                 "scope": "registration_only",
+                "continuation_ready": False if args.state == "registered" else None,
                 "agents": str(agents_path),
                 "manifest": str(manifest_path),
             },

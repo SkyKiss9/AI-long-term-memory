@@ -11,5 +11,5 @@
     "acceptance": null
   },
   "installed_on": "YYYY-MM-DD",
-  "note": "Ordinary continuation reads the current handoff first and expands to older records only when needed."
+  "note": "Registered means the rules and manifest exist; ordinary continuation is ready only after a usable handoff and timeline are registered."
 }
