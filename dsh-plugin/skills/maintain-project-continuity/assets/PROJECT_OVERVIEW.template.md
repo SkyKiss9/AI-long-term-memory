@@ -6,6 +6,10 @@ Updated: YYYY-MM-DD
 
 ## Real goal
 
+## Entry path
+
+New project direct setup, or old project reactivation from its own workspace. Note only the chosen route and why it matters.
+
 ## Scope and boundaries
 
 ## Confirmed decisions and reasons

@@ -1,3 +1,7 @@
-# The continuity feature is a standard SKILL.md bundle, not a mounted Cordis
-# runtime plugin. The patch stays empty for package compatibility.
+# AI Long-Term Memory continuity plugin for DeepSeek Harness (dsh).
+# The skill ships as resources in this package; scripts/install.mjs copies it
+# into the dsh user skill root (<DSH_HOME>/skills), which dsh discovers
+# automatically. This patch list is intentionally empty: the bundle
+# declaration above registers the package as a profile layer without side
+# effects, ready for future patch-based extensions.
 []

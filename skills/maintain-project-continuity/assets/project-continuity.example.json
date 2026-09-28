@@ -11,5 +11,5 @@
     "acceptance": null
   },
   "installed_on": "YYYY-MM-DD",
-  "note": "Registered means the rules and manifest exist; ordinary continuation is ready only after a usable handoff and timeline are registered."
+  "note": "New projects create records directly; old projects reactivate from their own workspace and decide the entry point from local evidence. Ordinary continuation reads the current handoff first."
 }

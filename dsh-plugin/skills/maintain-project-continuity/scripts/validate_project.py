@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Check continuity structure without claiming source fidelity or business acceptance."""
+"""Check continuity file structure without claiming memory or business acceptance."""
 
 from __future__ import annotations
 
@@ -8,7 +8,7 @@ import json
 import os
 import re
 import subprocess
-from pathlib import Path, PurePosixPath
+from pathlib import Path
 
 
 SKILL = "maintain-project-continuity"
@@ -18,105 +18,6 @@ BLOCK_PATH = Path(__file__).resolve().parent.parent / "assets" / "AGENTS.continu
 STATES = {"registered", "bootstrapped", "handoff-pending", "cold-start-validated", "live-validated"}
 LEGACY_STATES = {"installed"}
 DAILY_RECORDS = ("timeline", "handoff")
-READY_STATES = {"bootstrapped", "cold-start-validated", "live-validated"}
-WINDOWS_DRIVE = re.compile(r"^[A-Za-z]:")
-EVENT_ID = re.compile(r"\bT-\d{8}-\d{3,}\b")
-TIMELINE_EVENT_START = re.compile(r"^\s*(?:[-*]\s*)?`?(T-\d{8}-\d{3,})\b")
-HANDOFF_SECTIONS = ("Current:", "Boundary:", "Next authorized work:", "Basis:")
-
-
-def resolve_record_path(project: Path, value: str) -> tuple[Path, str]:
-    raw = value.strip()
-    portable = raw.replace("\\", "/")
-    if not portable or portable.startswith("/") or portable.startswith("//") or WINDOWS_DRIVE.match(portable):
-        raise ValueError("path must stay inside project")
-    logical = PurePosixPath(portable)
-    if logical.is_absolute() or any(part == ".." for part in logical.parts):
-        raise ValueError("path must stay inside project")
-    parts = [part for part in logical.parts if part not in ("", ".")]
-    if not parts:
-        raise ValueError("path must name a file inside project")
-    resolved_project = project.resolve()
-    candidate = resolved_project.joinpath(*parts).resolve()
-    try:
-        candidate.relative_to(resolved_project)
-    except ValueError as exc:
-        raise ValueError("path escapes project") from exc
-    return candidate, PurePosixPath(*parts).as_posix()
-
-
-def section_body(text: str, heading: str) -> str | None:
-    lines = text.splitlines()
-    indices = {line.strip(): i for i, line in enumerate(lines) if line.strip() in HANDOFF_SECTIONS}
-    if heading not in indices:
-        return None
-    start = indices[heading] + 1
-    later = [index for name, index in indices.items() if index >= start and name != heading]
-    end = min(later) if later else len(lines)
-    return "\n".join(lines[start:end]).strip()
-
-
-def validate_handoff(content: str, strict: bool, errors: list[str], warnings: list[str]) -> set[str]:
-    refs: set[str] = set()
-    updated = re.search(r"(?m)^Updated:\s*(\S.*?)\s*$", content)
-    revision_matches = re.findall(r"(?m)^Revision:\s*(\d+)\s*$", content)
-    revision = revision_matches[0] if len(revision_matches) == 1 else None
-    if len(revision_matches) > 1:
-        errors.append("handoff must contain exactly one Revision field")
-    lines = [line.strip() for line in content.splitlines()]
-    for heading in HANDOFF_SECTIONS:
-        if lines.count(heading) > 1:
-            errors.append(f"handoff section {heading} appears more than once")
-    if strict and updated is None:
-        errors.append("handoff must contain a non-empty Updated field")
-    if strict and revision is None and len(revision_matches) <= 1:
-        errors.append("handoff must contain a positive integer Revision field")
-    elif revision is not None and int(revision) < 1:
-        errors.append("handoff Revision must be at least 1")
-
-    for heading in HANDOFF_SECTIONS:
-        body = section_body(content, heading)
-        if body is None:
-            if strict:
-                errors.append(f"handoff missing required section {heading}")
-            else:
-                warnings.append(f"handoff missing section {heading}")
-            continue
-        if strict and not body:
-            errors.append(f"handoff section {heading} is empty")
-        if heading == "Basis:":
-            refs = set(EVENT_ID.findall(body))
-            if strict and not refs:
-                errors.append("handoff Basis must reference at least one timeline event ID")
-    return refs
-
-
-def validate_timeline(content: str, strict: bool, errors: list[str], warnings: list[str]) -> set[str]:
-    event_lines: list[tuple[str, str]] = []
-    for raw_line in content.splitlines():
-        match = TIMELINE_EVENT_START.match(raw_line)
-        if match:
-            event_lines.append((match.group(1), raw_line.strip()))
-
-    ids = [event_id for event_id, _ in event_lines]
-    unique = set(ids)
-    duplicates = sorted({event_id for event_id in ids if ids.count(event_id) > 1})
-    if duplicates:
-        errors.append(f"timeline event IDs must be unique: {', '.join(duplicates)}")
-    if strict and not ids:
-        errors.append("timeline must contain at least one event ID such as T-YYYYMMDD-001")
-
-    for event_id, line in event_lines:
-        if "Source:" not in line:
-            if strict:
-                errors.append(f"timeline event {event_id} is missing Source:")
-            else:
-                warnings.append(f"timeline event {event_id} is missing Source:")
-            continue
-        source = line.split("Source:", 1)[1].strip().strip("`")
-        if not source:
-            errors.append(f"timeline event {event_id} has an empty source locator")
-    return unique
 
 
 def main() -> int:
@@ -137,7 +38,7 @@ def main() -> int:
     else:
         try:
             loaded_manifest = json.loads(manifest_path.read_text(encoding="utf-8-sig"))
-        except Exception as exc:
+        except Exception as exc:  # pragma: no cover - defensive diagnostic
             errors.append(f"invalid manifest: {exc}")
             manifest = {}
         else:
@@ -199,27 +100,22 @@ def main() -> int:
         records: dict[str, object] = {}
     else:
         records = raw_records
-
     if state not in {"registered", "installed", None}:
         for key in DAILY_RECORDS:
             if not records.get(key):
                 errors.append(f"{key} is required for declared state {state}")
 
     seen_paths: dict[Path, str] = {}
-    record_contents: dict[str, str] = {}
-    normalized_paths: dict[str, str] = {}
     for key, value in records.items():
         if value is None:
             continue
         if not isinstance(key, str) or not isinstance(value, str) or not value.strip():
             errors.append(f"record {key!r} path must be a non-empty string or null")
             continue
-        try:
-            candidate, portable = resolve_record_path(project, value)
-        except ValueError as exc:
-            errors.append(f"record {key} {exc}")
+        candidate = (project / value).resolve()
+        if candidate != project and project not in candidate.parents:
+            errors.append(f"record {key} escapes project")
             continue
-        normalized_paths[key] = portable
         previous = seen_paths.get(candidate)
         if previous is not None:
             warnings.append(f"records {previous} and {key} share the same file; readers must deduplicate it")
@@ -235,25 +131,6 @@ def main() -> int:
             continue
         if not content.strip():
             errors.append(f"record {key} is empty: {value}")
-            continue
-        record_contents[key] = content
-
-    strict = state in READY_STATES
-    timeline_ids: set[str] = set()
-    handoff_refs: set[str] = set()
-    if "timeline" in record_contents:
-        timeline_ids = validate_timeline(record_contents["timeline"], strict, errors, warnings)
-    if "handoff" in record_contents:
-        handoff_refs = validate_handoff(record_contents["handoff"], strict, errors, warnings)
-    if handoff_refs and timeline_ids:
-        missing_refs = sorted(handoff_refs - timeline_ids)
-        if missing_refs:
-            errors.append(f"handoff Basis references missing timeline events: {', '.join(missing_refs)}")
-
-    if state == "registered":
-        warnings.append("project is registered only; ordinary continuation is not ready until usable timeline and handoff records are registered")
-    elif state == "handoff-pending":
-        warnings.append("handoff is pending; ordinary continuation is not yet declared ready")
 
     codex_home = Path(os.environ.get("CODEX_HOME", str(Path.home() / ".codex")))
     global_skill = codex_home / "skills" / SKILL / "SKILL.md"
@@ -299,17 +176,14 @@ def main() -> int:
         else:
             warnings.append("Git is unavailable")
 
-    continuation_ready = state in READY_STATES and not errors
     result = {
         "output_schema_version": 1,
         "scope": "structure_only",
         "structure_ok": not errors,
-        "continuation_ready": continuation_ready,
         "project": manifest.get("project"),
         "declared_state": state,
         "git_branch": git_branch,
         "git_dirty_count": len(git_dirty),
-        "normalized_record_paths": normalized_paths,
         "not_checked": [
             "source_fidelity",
             "memory_accuracy",

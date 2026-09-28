@@ -19,13 +19,16 @@
 
 ### 它怎么工作
 
-1. 原始材料保留事实，时间线用一两行记录变化和来源，当前交接只作为书签。
-2. 普通新对话只读当前交接，然后直接处理用户的工作。
-3. 信息不足或冲突时，AI按引用局部回查；不默认加载完整历史。
-4. 有实质变化时由AI自动写回，用户不需要管理记忆系统。
+1. 新项目直接在该项目里建档；老项目在该项目自己的工作区新开对话重新激活，再决定入口、保留范围和落实方式。
+2. 原始材料保留事实，时间线用一两行记录变化和来源，当前交接只作为书签。
+3. 普通新对话只读当前交接，然后直接处理用户的工作。
+4. 信息不足或冲突时，AI按引用局部回查；不默认加载完整历史。
+5. 有实质变化时由AI自动写回，用户不需要管理记忆系统。
 
-### 日常接续与专项审计
+### 新项目、老项目与专项审计
 
+- 新项目：直接建立清单、规则块、时间线和当前交接。
+- 老项目：由用户在该项目工作区新开对话重新激活，再按项目证据决定入口和保留范围；不要从别的项目批量迁移或统一入口。
 - 日常接续：只读当前交接，必要时局部回查。
 - 首次建档、完整历史审计和多轮失真复核：属于专项工作，才读取完整来源。
 - 清单里的状态只是历史说明，不能自动把普通对话变成考试。
@@ -49,13 +52,10 @@ python skills/maintain-project-continuity/scripts/validate_project.py <project-r
 ### DeepSeek Harness (dsh) 快速开始
 
 1. 在本仓库目录运行 `dsh plugin --profile web add ./dsh-plugin`。
-2. 运行 `node ./dsh-plugin/scripts/install.mjs`，把标准 `SKILL.md` 技能包安装到 dsh 用户技能目录 `$DSH_HOME/skills/maintain-project-continuity`（默认是 `~/.dsh/skills/maintain-project-continuity`）。安装会先暂存完整目录，再整体替换旧版本；如果激活失败，会回滚旧目录，因此旧版本遗留文件不会继续保留。
-3. `cordis.patch.yml` 有意保持为空，因为不需要挂载 Cordis runtime row。
-4. 重启 `dsh web`（或新开会话），接续技能即可在技能列表中使用。
+2. 运行 `node node_modules/@skykiss9/dsh-continuity/scripts/install.mjs` 把技能装进 dsh 用户技能目录。
+3. 重启 `dsh web`（或新开会话），接续技能即可在技能列表中使用。
 
 > Windows 注意：`dsh plugin add` 的本地路径不能含空格；如果仓库路径含空格，先把 `dsh-plugin` 目录复制到无空格路径（例如 `C:\dsh-continuity`）再执行安装。
-
-清单状态为 `registered` 时，只表示清单和规则已经安装；只有目标项目存在可用的时间线和当前交接，校验结果才会报告 `continuation_ready: true`。
 
 ### 这个仓库包含什么
 
@@ -124,8 +124,12 @@ This public version is fully redacted. It keeps only the generic method and gene
 3. When something is missing or contradictory, the AI follows targeted references instead of loading all history.
 4. The AI writes back material changes automatically; the user does not administer the memory system.
 
-### Daily continuation versus audits
+New projects create records directly in that project. Old projects are reactivated from a fresh conversation in their own workspace, then choose the entry point and preserved scope from local evidence instead of being batch-migrated from elsewhere.
 
+### New projects, old projects, and audits
+
+- New projects create the manifest, rules block, timeline, and handoff directly.
+- Old projects reactivate from a fresh conversation in their own workspace, then choose the entry point and preserved scope from local evidence; do not batch-migrate or auto-unify them from elsewhere.
 - Daily continuation reads only the current handoff and expands through targeted lookup when needed.
 - First-time reconstruction, full-history audits, and multi-round drift studies are special verification work.
 - Manifest states are historical labels, not a router that turns ordinary conversations into exams.
@@ -149,13 +153,10 @@ python skills/maintain-project-continuity/scripts/validate_project.py <project-r
 ### DeepSeek Harness (dsh) quick start
 
 1. From this repository checkout, run `dsh plugin --profile web add ./dsh-plugin`.
-2. Run `node ./dsh-plugin/scripts/install.mjs` to install the standard `SKILL.md` bundle into `$DSH_HOME/skills/maintain-project-continuity` (default `~/.dsh/skills/maintain-project-continuity`). Reinstall stages a complete copy and swaps the whole skill directory, removing stale files from older versions; if activation fails, the previous directory is restored.
-3. `cordis.patch.yml` is intentionally empty because no mounted Cordis runtime row is required.
-4. Restart `dsh web` (or start a new session); the continuity skill appears in the skill list.
+2. Run `node node_modules/@skykiss9/dsh-continuity/scripts/install.mjs` to install the skill into the dsh user skill root.
+3. Restart `dsh web` (or start a new session); the continuity skill appears in the skill list.
 
 > Windows note: `dsh plugin add` cannot take a local path containing spaces. If your checkout path contains spaces, copy the `dsh-plugin` directory to a space-free path (e.g. `C:\dsh-continuity`) first, then install from there.
-
-`registered` means that the manifest and rules are installed; it does not mean ordinary continuation is ready. A usable timeline and current handoff are also required for `continuation_ready: true`.
 
 ### What this repository includes
 
@@ -183,6 +184,7 @@ python skills/maintain-project-continuity/scripts/validate_project.py <project-r
 
 ### The most important rules
 
+- New projects are recorded directly; old projects are reactivated from their own workspace before choosing entry point and preserved scope.
 - Ordinary starts read only the current handoff, not the full timeline or source history.
 - The user works and decides normally; the AI owns lookup, maintenance, and write-back.
 - Full history is read only for first-time reconstruction, an explicit audit, or a conflict that targeted lookup cannot resolve.

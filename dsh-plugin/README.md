@@ -1,31 +1,30 @@
 # dsh-continuity
 
-AI Long-Term Memory project continuity for DeepSeek Harness (dsh): handoff-first continuation, targeted lookup, and safe automatic write-back for long-running projects.
+AI Long-Term Memory project continuity as a **DeepSeek Harness (dsh)** plugin bundle: handoff-first continuation, targeted lookup, and automatic write-back for long-running projects.
 
-The actual capability is a standard `SKILL.md` bundle. dsh can discover standard skills from user and project skill roots, so a Cordis runtime patch is not required for this feature.
+This package ships the same redacted, bilingual `maintain-project-continuity` skill published in this repository's root `skills/` directory.
 
-## Install from this repository
+## Install
 
 ```bash
-node ./dsh-plugin/scripts/install.mjs
+# from this repository checkout
+dsh plugin --profile web add ./dsh-plugin
+
+# install the skill files into the dsh user skill root
+node node_modules/@skykiss9/dsh-continuity/scripts/install.mjs
 ```
 
-This stages a complete copy and then replaces `$DSH_HOME/skills/maintain-project-continuity` as one directory. Reinstalling removes stale files from older versions instead of leaving a mixed old/new skill tree.
+Then restart `dsh web` (or start a new session). The continuity skill appears in the skill list and is available in every workspace.
 
-If `DSH_HOME` is not set, the default target is `~/.dsh/skills/maintain-project-continuity`.
+> Windows note: `dsh plugin add` cannot take a local path containing spaces. If your checkout path contains spaces (for example `E:\Codex OpenAI\...`), copy the `dsh-plugin` directory to a space-free path such as `C:\dsh-continuity` and run the commands from there.
 
 ## Verify
 
 ```bash
-ls "$DSH_HOME/skills/maintain-project-continuity/SKILL.md"
+ls "$HOME/.dsh/skills/maintain-project-continuity/SKILL.md"
+dsh --profile web --dump-config   # shows the bundle in dsh.profile.bundles
 ```
-
-If `DSH_HOME` is unset, use `~/.dsh/skills/...` instead. Start a new dsh session after installation; if an already-running instance does not refresh its skill catalog, restart that instance.
-
-## Cordis bundle note
-
-`cordis.patch.yml` is intentionally empty. `dsh plugin add` installs packages into a profile's `node_modules`, but this continuity feature does not need a mounted runtime row; it only needs the skill directory in a discovery root.
 
 ## What it does not install
 
-Real project handoffs, timelines, or business data stay in your own workspace. This package only provides the generic method, templates, scripts, and validation rules.
+Real project handoffs, timelines, or business data stay in your own workspace. This package only provides the generic method, templates, and validation scripts.
