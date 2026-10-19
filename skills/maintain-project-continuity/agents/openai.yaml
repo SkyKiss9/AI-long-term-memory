@@ -1,4 +1,4 @@
 interface:
-  display_name: "AI长期记忆 · Long-Term Memory (Codex & DeepSeek Harness)"
-  short_description: "给 Codex 和 DeepSeek Harness (dsh) 的长期项目连续性技能：新对话先读当前位置，需要时再回查原始来源 / Project continuity for Codex and DeepSeek Harness (dsh): start from the current bookmark and expand to original sources only when needed."
-  default_prompt: "自动使用 $maintain-project-continuity。新项目直接建档；老项目在自身工作区新开对话重新激活后决定入口和保留范围；普通继续只读当前交接。 / Use $maintain-project-continuity automatically. Create records directly for new projects; reactivate old projects from their own workspace; ordinary continuation reads only the current handoff."
+  display_name: "长期项目接续"
+  short_description: "按时间记录项目由来、决议和理由，接续当前工作并安全完成版本归档"
+  default_prompt: "使用 $maintain-project-continuity 接续或收尾本项目：先读当前交接，按需回查来源，记录决定及理由，并妥善归档本轮改动。"

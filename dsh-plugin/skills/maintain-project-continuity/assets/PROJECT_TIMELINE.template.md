@@ -1,5 +1,5 @@
 # Project Timeline
 
-`YYYY-MM-DD: What materially changed; include the reason only when it matters. Source: conversation, file, commit, page, log, or runtime result.`
+YYYY-MM-DD: Why this work arose; what was decided and its known reason; what was done and the actual result or remaining boundary. Source: direct conversation/turn or specific artifact.
 
-`YYYY-MM-DD: Initial continuity entry or old-project reactivation decision; name the chosen entry point and preserved record boundary when relevant. Source: conversation or project evidence.`
+<!-- Normally two or three sentences per substantive conversation or milestone; split independent decisions when needed. Do not invent reasons, log chatter, repeat recorded closeouts or rewrite old decisions. Append later corrections with their source. -->

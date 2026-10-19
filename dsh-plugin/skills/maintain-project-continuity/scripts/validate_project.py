@@ -132,10 +132,16 @@ def main() -> int:
         if not content.strip():
             errors.append(f"record {key} is empty: {value}")
 
-    codex_home = Path(os.environ.get("CODEX_HOME", str(Path.home() / ".codex")))
-    global_skill = codex_home / "skills" / SKILL / "SKILL.md"
-    if not global_skill.is_file():
-        warnings.append(f"global skill not found at {global_skill}")
+    skill_homes = {
+        "codex": Path(os.environ.get("CODEX_HOME", str(Path.home() / ".codex"))),
+        "claude_code": Path(os.environ.get("CLAUDE_CONFIG_DIR", str(Path.home() / ".claude"))),
+    }
+    skill_hosts = sorted(
+        host for host, home in skill_homes.items() if (home / "skills" / SKILL / "SKILL.md").is_file()
+    )
+    if not skill_hosts:
+        searched = ", ".join(str(home / "skills" / SKILL) for home in skill_homes.values())
+        warnings.append(f"global skill not found in any host: {searched}")
 
     git_branch = None
     git_dirty: list[str] = []
@@ -182,6 +188,7 @@ def main() -> int:
         "structure_ok": not errors,
         "project": manifest.get("project"),
         "declared_state": state,
+        "skill_hosts": skill_hosts,
         "git_branch": git_branch,
         "git_dirty_count": len(git_dirty),
         "not_checked": [

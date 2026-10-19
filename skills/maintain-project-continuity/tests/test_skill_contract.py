@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import re
 import subprocess
 import sys
 import tempfile
@@ -29,37 +30,15 @@ class SkillContractTests(unittest.TestCase):
             check=False,
         )
 
-    def test_ordinary_start_is_lightweight_and_user_owned_work_stays_primary(self) -> None:
-        skill = (SKILL_ROOT / "SKILL.md").read_text(encoding="utf-8-sig")
-        handoff_template = (SKILL_ROOT / "assets" / "PROJECT_HANDOFF.template.md").read_text(encoding="utf-8-sig")
-        timeline_template = (SKILL_ROOT / "assets" / "PROJECT_TIMELINE.template.md").read_text(encoding="utf-8-sig")
-        self.assertIn("read only the current handoff", skill)
-        self.assertIn("Do not begin an ordinary conversation with a project-history recital", skill)
-        self.assertIn("never turns an ordinary start into a cold-start exam", skill)
-        self.assertIn("The user does not need to request or supervise this bookkeeping", skill)
-        self.assertIn("Keep continuity work in the background", skill)
-        self.assertIn("does not authorize changes to business code", skill)
-        self.assertIn("one or two lines", skill)
-        self.assertIn("Replace stale handoff details", skill)
-        self.assertIn("New project: create the continuity records directly", skill)
-        self.assertIn("Old project: do not batch-migrate", skill)
-        self.assertIn("read only the current handoff", BLOCK)
-        self.assertIn("do not give the user a recovery report unless asked", BLOCK)
-        self.assertIn("append one short timeline note", BLOCK)
-        self.assertIn("must not override global user-facing communication rules", BLOCK)
-        self.assertIn("does not authorize changes to business code", BLOCK)
-        self.assertIn("New projects should get their own continuity records directly", BLOCK)
-        self.assertIn("do not batch-migrate or auto-unify", BLOCK)
-        self.assertEqual(
-            [line for line in handoff_template.splitlines() if line.endswith(":")],
-            ["Current:", "Boundary:", "Next authorized work:"],
-        )
-        self.assertIn("What materially changed", timeline_template)
-        self.assertIn("old-project reactivation decision", timeline_template)
-        self.assertLessEqual(len(timeline_template.splitlines()), 5)
-        self.assertNotIn("explicitly covers all nine items", skill)
-        self.assertNotIn("current fresh conversation is the cold-start acceptance task", skill)
-        self.assertNotIn("this fresh conversation is the cold-start test", BLOCK)
+    def test_skill_references_resolve_inside_package(self) -> None:
+        # Packaging integrity, not a claim about model behavior or memory fidelity.
+        for document in [SKILL_ROOT / "SKILL.md", * (SKILL_ROOT / "references").glob("*.md")]:
+            for target in re.findall(r"\]\(([^)]+)\)", document.read_text(encoding="utf-8-sig")):
+                if "://" in target or target.startswith("#"):
+                    continue
+                resolved = (document.parent / target.split("#", 1)[0]).resolve()
+                self.assertIn(SKILL_ROOT.resolve(), resolved.parents)
+                self.assertTrue(resolved.is_file(), f"{document}: {target}")
 
     def test_first_registration_and_rules_only_update_are_safe_and_idempotent(self) -> None:
         with tempfile.TemporaryDirectory() as temp:

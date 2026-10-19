@@ -4,6 +4,8 @@ Updated: YYYY-MM-DD
 
 ## Why this project exists
 
+Record the original problem and its direct source; append later goal changes to the timeline rather than rewriting the origin.
+
 ## Real goal
 
 ## Entry path

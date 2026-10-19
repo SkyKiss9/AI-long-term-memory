@@ -1,39 +1,37 @@
-# Long-Term Project Continuity Method
+# Project notebook, not chained summaries
 
-## The simple relationship
+Original sources establish what was said or done. A chronological notebook retains the origin, decisions, reasons and changes. A current handoff points to today's work. Git preserves attributable file changes. None substitutes for the others.
 
-Original sources prove what happened. The timeline explains what changed and why. The current handoff points to where work should continue.
+## Minimal records
 
-Information moves from source to timeline to handoff. When verification is needed, follow the pointer back to the original source instead of treating one summary as evidence for another.
+Reuse the project's overview, timeline and handoff; do not add a new layer or per-chat report by default. The overview preserves why the project began, the desired outcome and durable constraints. Record later goal changes in the timeline without rewriting the original intent.
 
-## Choose the entry path
+A normal notebook entry is two or three sentences with a date and direct source. Record the known reason for an important decision, distinguish a suggestion from a decision and distinguish work done from verification. Important decisions without file changes still count. Split independent matters rather than dropping meaningful reasons or limits to satisfy a word count.
 
-New project: build the continuity records in that project from the beginning. Add the manifest, rules block, timeline, and current handoff; keep the first handoff short and tied to the user's actual next work.
+For example (fictional):
 
-Old project: do not automatically force every existing project into one shared entry. Start a fresh conversation in that project's own workspace, activate the skill there, and decide the entry point, preserved records, and rollout scope from that project's own evidence.
+> 2026-10-16: To let the warehouse work without network access, the user chose a local export instead of a cloud-only page; online publishing is not authorized. The export is implemented but not yet tested with the warehouse's files. Source: conversation A, user turn 3; export change in commit B.
 
-## Ordinary use
+A later decision to publish online would be a new entry with its new reason and scope, not an edit claiming the original decision was online-first. If the user later says to stop the task, record cancellation rather than successful validation.
 
-An ordinary new conversation reads the current handoff first and starts the user's work. It opens only the timeline entries and original sources needed for the current task. The complete history is not a startup dependency.
+## Current bookmark
 
-The user does not maintain this system. The AI records material changes and their source, refreshes the current handoff, and performs targeted lookup when something is unclear.
+The manifest only locates records; keep its note static. Current state lives in the handoff alone, so a dated status in the manifest note becomes a competing bookmark.
 
-## What the handoff contains
+Keep the goal/origin pointer, relevant effective decisions and reasons or links, latest deliverable and verification level, unresolved/stopped matters, authority boundary and next authorized action. Include an exact disposition for this round's uncommitted changes when any remain. Omit empty sections.
 
-- Current position
-- Current boundary or blocker
-- Next authorized work
+Build updates from the current conversation and observed artifacts while retaining still-valid decisions. Replace outdated state instead of stacking summaries. Do not mechanically compress the last handoff into the next. Long history stays in the timeline, not in the startup bookmark.
 
-It is a short bookmark, not a second project history. Replace stale details instead of accumulating them.
+## Retrieval and repair
 
-## What the timeline contains
+Ordinary starts read the manifest and current handoff. Retrieve only the timeline entries and original sources needed to understand a relevant decision, resolve a contradiction or change direction. No default full-history reading or memory exam.
 
-The timeline is a light chronological notebook. A normal entry is one or two lines: date, what materially changed, and the direct conversation, file, commit, page, log, or runtime result. Add the reason only when it helps explain the change. Later changes are appended rather than written over earlier decisions.
+Each substantive entry needs a recoverable source: a conversation identifier and turn when available (for Claude Code, the session id the hook supplies), or a precise document, commit or observation. A bare “this conversation” without an identifier is not a durable locator. If the ordinary conversation reader returns no content, try the known local transcript or compressed archive when available. If the source still cannot be read, mark the gap instead of treating another summary as proof.
 
-## When full history is appropriate
+Do not merge competing entries or migrate old projects from elsewhere. Resolve the relevant authority conflict in that project's own workspace, preserve previous records, and ask only if evidence and existing decisions cannot settle a consequential choice. Project-wide rebuilding is for first registration or explicitly scoped repair, not daily use.
 
-Use full source reconstruction for a project with no usable records, an explicit history audit, or a widespread conflict that targeted lookup cannot resolve. Cold-start exercises and multi-round drift studies are verification work, not the user's daily entry path.
+## Closeout and tests
 
-## Tool boundary
+Record milestones during work. At closeout, reconcile the whole conversation with the saved notebook, refresh the bookmark, apply the separate Git closeout procedure and give a truthful short receipt. Repetition requires no duplicate entry. A conversation ending does not itself complete or cancel the task.
 
-Tools may check structure and broken references. They cannot certify source fidelity, memory accuracy, business completion, or real user experience.
+Structural checks detect missing, malformed or stale files, not faithful memory or safely attributed commits. Authorized behavioral tests need real source fixtures and fresh context; check the saved artifacts and commit content, not just the agent's claim. Never infer all-project reliability from a few passing cases.

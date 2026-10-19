@@ -2,10 +2,16 @@
 
 Updated: YYYY-MM-DD
 
-<!-- New project: fill this directly as the first current bookmark. Old project reactivation: after targeted lookup, record the chosen entry point and preservation boundary here. -->
+<!-- Keep only current information, omit empty sections, and link to direct sources. Preserve history in the timeline, not here. -->
 
-Current:
+Goal and origin reference:
 
-Boundary:
+Effective decisions and reasons (or precise references):
+
+Current deliverable and verification level:
+
+Unresolved or stopped work and authorization boundary:
 
 Next authorized work:
+
+Uncommitted changes, reason and disposition (if any):

@@ -1,8 +1,8 @@
 # dsh-continuity
 
-AI Long-Term Memory project continuity as a **DeepSeek Harness (dsh)** plugin bundle: handoff-first continuation, targeted lookup, and automatic write-back for long-running projects.
+AI Long-Term Memory project continuity as a **DeepSeek Harness (dsh)** plugin bundle: source-linked decision notes, handoff-first continuation, targeted lookup and scoped Git closeout for long-running projects.
 
-This package ships the same redacted, bilingual `maintain-project-continuity` skill published in this repository's root `skills/` directory.
+This package ships the same redacted `maintain-project-continuity` skill published in this repository's root `skills/` directory.
 
 ## Install
 
